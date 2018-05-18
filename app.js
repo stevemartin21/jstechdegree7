@@ -1,109 +1,39 @@
 //  __ =   ===  __  __  ` `  % %  __dirname  __filename
 
-/*THis works
-
-T.get('search/tweets', { q: 'rio de janeiro since:2011-07-17', count: 5 }, function(err, data, response) {
-  console.log(data)
-
-});
-
-*/
-/*
-		The template should have spaces for:
-		your 5 most recent tweets
-		your 5 most recent friends
-		your 5 most recent direct messages
-
-*/
-
-// To do 
-
-// Read twitter API Dos
-
-//Write Put File based on index.html file--do a little piece of pug at a time
-
-
+//LIst of Variables and modules 
 const express= require('express');
-
-//console.log('Success');
-
 const app = express();
-
 const bodyParser= require('body-parser');
-
 var Twit = require('twit');
-
 var config = require('./config');
-//console.log(config);
-
 var T = new Twit(config);
 
-/*
 
-var params  = { 
-	//q: 'rio de janeiro flamengo since:2011-07-17', 
-	count: 5,
-	screen_name: 'SackLakeCity'
-	//result_type: 'popular' 
-};
-
-*/
-
-// I needed to create an object called params that can be passed into the get request and then can be used to get the recent tweens
-
-//Because I used the module it makes it really eacy, basically I do a get request which grabs my authentication and goes to twitter  and based on the query
-// I do I can get 
-
-//T.get('search/tweets', params, gotData);
-
-//GET statuses/user_timeline  since_id  statuses/user_timeline
-
-// Friends profile image real name screen name
-
-/*
-
- userImage = data.users[i].profile_image_url;
-  
-  friends.realName = data.users[i].name;
-  
-  friends.screenName = data.users[i].screen_name;
-
-
-*/
-
-
+//Request Friend list 
 
 let friendList =[];
 
 T.get('friends/list', { screen_name: 'SackLakeCity', count:5 },  function (err, data, response) {
- /// console.log(data);
-  //console.log('It worked');
- // console.log(data.users.length);
 
   	for (let i=0; i<data.users.length; i++){
 
-  			//console.log('it worked again')
-
+  			//RUn for loop and grab values for each friend
 		   let userImage = data.users[i].profile_image_url;
 			let realName = data.users[i].name;
 		  let screenName = data.users[i].screen_name;
-		
-		  friendList.push({
 
+		  //Add object to array with values 
+		  friendList.push({
 		  userImage:userImage,
 		  realName:realName,
 		  screenName:screenName
-		 
 		  });
-
-		 
-
 	}
  
- // console.log(friends);
+ 
 });
 
-//let text,retweet, likes, dateTweeted;
+// Status Updatee for twitter
 
 let statusesArray= [
 ]
@@ -111,10 +41,10 @@ let statusesArray= [
 let statuses={};
 
 T.get('statuses/user_timeline', { screen_name: 'SackLakeCity', count:5 },  function (err, data, response) {
- //console.log(data);
- //console.log(data.length);
-
+	//For Loop for each item in teh data
  	for (let i=0; i<data.length; i++){
+
+ 		//Grab Values 
 
 		   let name= data[i].user.name;
 			let followers  = data[i].user.friends_count;
@@ -124,9 +54,7 @@ T.get('statuses/user_timeline', { screen_name: 'SackLakeCity', count:5 },  funct
 		  let likes = data[i].favorite_count;
 		  let dateTweeted =data[i].created_at;
 		  let image = data[i].user.profile_image_url;
-
-		  
-
+		  // PUt values into an object and array
 		  statusesArray.push({
 
 		  text:text,
@@ -137,141 +65,58 @@ T.get('statuses/user_timeline', { screen_name: 'SackLakeCity', count:5 },  funct
 		  likes:likes,
 		  dateTweeted:dateTweeted,
 		  image:image
+
 		  });  
-		  //console.log(statusesArray);	
-		 
+		  
 	} 
 });
 
 
-
-
-
-
-//direct_messages/events/list  Messages  message body  date the message was sent time the message was sent
-
-/*
-
-ul
-  each val, index in {1:'one',2:'two',3:'three'}
-    li= index + ': ' + val
-*/
+//Direct Message Request
 var directMessage =[];
 var directMessageList =[];
 
 T.get('direct_messages/events/list', { count: 7 }, function(err, data, response) {
-	
-
-
+// For loop for messates
 	for (i=0; i<data.events.length; i++){
 		id= data.events[i].id;
-
+		//Grab Ide
 		directMessage.push(id);
 
 	}
-
-	//console.log(directMessage);
-
+	//second request iwth ids
 			for (i=0; i<directMessage.length; i++){
-
-
 					T.get('direct_messages/show', { id: directMessage[i] }, function(err, data, response)	{
 
-						//console.log(data);
+						let message = data.text;
+						let sender = data.sender.profile_image_url;
+						let time = data.sender.created_at;
+						let name = data.sender.name;		
+						// Add vlaues to object and array
+						directMessageList.push({
 
-								
-
-
-								let message = data.text;
-								let sender = data.sender.profile_image_url;
-								let time = data.sender.created_at;
-								let name = data.sender.name;
-
-
-										directMessageList.push({
-
-						  				message:message,
-						  				sender:sender,
-						  				time:time,
-						  				name:name
+						  message:message,
+						  sender:sender,
+						  time:time,
+						  name:name
 						 
-						  				});
-
-						  				
-
-						  		
-
-
+						 });
 					})
-
 			}
-
-
-
 });
 
 
-//console.log(directMessage);
-
-	
-/*
-// .message_create
-
-function gotData(err, data, response) {
-
-	console.log(data);
-	
-	/*var tweets = data.statuses;
-	for (i=0; i<tweets.length; i++){
-		console.log(tweets[i].text);
-		//console.log(data.events[4].message_create.message_data.text);
-	}
-	
-  
-};
-
-var tweet = { status: 'Go Utes!' }
-
-function tweeted (err, data, response) {
-  if(err){
-  	console.log('Something Web Wrong')
-  }else{
-  	console.log('Congrats you sent a tweet!')
-  }
-}
-
-*/
-
-
-//T.post('statuses/update', tweet, tweeted);
-
-
-
-
-
-
-
+//Set the pug engine
 app.set('view engine', 'pug');
-
+//request public folders
 app.use(express.static('public'))
-
+//set route to pull request
 app.get('/', (req, res)=> {
-
+	//load created ojbects 
 	res.render('index', {statusesArray, friendList, directMessageList});
-	
-	console.log(friendList);
-	//console.log(friends);
-	console.log(directMessageList);
-
 })
 
-
-
-
-
-
 app.listen(3000, () =>{
-
 	console.log('Things are runnning!')
 } )
 
