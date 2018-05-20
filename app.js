@@ -7,12 +7,13 @@ const bodyParser= require('body-parser');
 var Twit = require('twit');
 var config = require('./config');
 var T = new Twit(config);
+var userName = config.accountName
 
 //Request Friend list 
 let friendList =[];
 
-T.get('friends/list', { screen_name: 'SackLakeCity', count:5 },  function (err, data, response) {
-
+T.get('friends/list', { screen_name: userName, count:5 },  function (err, data, response) {
+	console.log('success');
   	for (let i=0; i<data.users.length; i++){
 
   			//RUn for loop and grab values for each friend
@@ -38,7 +39,7 @@ let statusesArray= [
 
 let statuses={};
 
-T.get('statuses/user_timeline', { screen_name: 'SackLakeCity', count:5 },  function (err, data, response) {
+T.get('statuses/user_timeline', { screen_name: userName, count:5 },  function (err, data, response) {
 	//For Loop for each item in teh data
  	for (let i=0; i<data.length; i++){
 
